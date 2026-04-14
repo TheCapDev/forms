@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>LoginDetails</h1>
+
+    {% for d in details %}
+    <p>
+        <strong>{{d.email}}</strong>
+    </p>
+
+    <p>
+        Password: {{d.password}}
+    </p>
+
+    <hr>
+    {% endfor %}
+{% endblock %}
