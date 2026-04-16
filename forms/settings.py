@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +30,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default='unsecure-key')
 DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
-
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Application definition
 
@@ -45,12 +48,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',   
 ]
 
 ROOT_URLCONF = 'forms.urls'
@@ -77,13 +82,13 @@ WSGI_APPLICATION = 'forms.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-'default': {
-'ENGINE': 'django.db.backends.postgresql',
-'NAME': 'WebDatabase',
-'USER': 'postgres',
-'PASSWORD': 'AdminDatabasePassword',
-'HOST': 'localhost'
-}
+# 'default': {
+# 'ENGINE': 'django.db.backends.postgresql',
+# 'NAME': 'WebDatabase',
+# 'USER': 'postgres',
+# 'PASSWORD': 'AdminDatabasePassword',
+# 'HOST': 'localhost'
+'default': dj_database_url.config(default=os.environ.get("DATABASE_URL"))
 }
 
 # Password validation
@@ -121,4 +126,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# user folder mapping
+STATICFILES_DIRS = [
+    BASE_DIR / STATIC_URL,
+]
+if not DEBUG:
+# django internal mapping
+    STATIC_ROOT = BASE_DIR / "assets"
+    STATICFILE_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
